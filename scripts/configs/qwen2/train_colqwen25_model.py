@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 
 import torch
-from datasets import load_dataset
+from datasets import load_dataset, load_from_disk
 from peft import LoraConfig
 from transformers import TrainingArguments
 
@@ -46,18 +46,19 @@ if __name__ == "__main__":
     config = ColModelTrainingConfig(
         output_dir=args.output_dir,
         processor=ColQwen2_5_Processor.from_pretrained(
-            pretrained_model_name_or_path="./models/base_models/colqwen2.5-base",
+            pretrained_model_name_or_path="vidore/colqwen2.5-base",
             max_num_visual_tokens=768,
         ),
         model=ColQwen2_5.from_pretrained(
-            pretrained_model_name_or_path="./models/base_models/colqwen2.5-base",
+            pretrained_model_name_or_path="vidore/colqwen2.5-base",
             torch_dtype=torch.bfloat16,
             use_cache=False,
             attn_implementation="flash_attention_2",
         ),
         train_dataset=load_train_set(),
+        # train_dataset=load_train_set(), or "./data_dir/colpali_train_set"
         eval_dataset=ColPaliEngineDataset(
-            load_dataset("./data_dir/colpali_train_set", split="test"), pos_target_column_name="image"
+            load_from_disk("/content/colpali/examples/test_data_proper"), pos_target_column_name="image"
         ),
         run_eval=True,
         loss_func=loss_func,
