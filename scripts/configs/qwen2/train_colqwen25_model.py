@@ -53,7 +53,7 @@ if __name__ == "__main__":
             pretrained_model_name_or_path="vidore/colqwen2.5-base",
             torch_dtype=torch.bfloat16,
             use_cache=False,
-            attn_implementation="flash_attention_2",
+            attn_implementation="flash_attention_2", #eager flash_attention_2
         ),
         train_dataset=load_train_set(),
         # train_dataset=load_train_set(), or "./data_dir/colpali_train_set"
@@ -71,7 +71,7 @@ if __name__ == "__main__":
             gradient_checkpointing_kwargs={"use_reentrant": False},
             per_device_eval_batch_size=16,
             eval_strategy="steps",
-            dataloader_num_workers=8,
+            dataloader_num_workers=0,
             save_steps=500,
             logging_steps=10,
             eval_steps=100,

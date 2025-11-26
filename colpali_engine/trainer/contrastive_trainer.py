@@ -53,6 +53,10 @@ class ContrastiveTrainer(Trainer):
         self.eval_dataset_list = eval_dataset_list
         self.compute_symetric_loss = compute_symetric_loss
 
+        if self.data_collator is not None:
+            self.query_prefix = getattr(self.data_collator, 'query_prefix', 'query_')
+            self.pos_prefix = getattr(self.data_collator, 'pos_doc_prefix', 'pos_doc_')
+            self.neg_prefix = getattr(self.data_collator, 'neg_doc_prefix', 'neg_doc_')
     def get_train_dataloader(self) -> DataLoader:
         """
         Returns the training [`~torch.utils.data.DataLoader`].
@@ -116,7 +120,7 @@ class ContrastiveTrainer(Trainer):
 
         return self.accelerator.prepare(dataloader)
 
-    def _get_train_sampler(self) -> Optional[torch.utils.data.Sampler]:
+    def _get_train_sampler(self, dataset=None) -> Optional[torch.utils.data.Sampler]:
         if self.train_dataset_list is None:
             return super()._get_train_sampler()
 
@@ -182,6 +186,8 @@ class ContrastiveTrainer(Trainer):
         return neg_doc_outputs
 
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+
+
         query_inputs = {k[len(self.query_prefix) :]: v for k, v in inputs.items() if k.startswith(self.query_prefix)}
         query_outputs = model(**query_inputs)
         # feed only kwargs with 'doc_' prefix
